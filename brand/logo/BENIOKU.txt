@@ -1,0 +1,9 @@
+istihbar logo paketi. Üretici: scripts/logo-paketi.mjs — elle düzenlemeyin, yeniden üretin.
+
+- istihbar-logo              Yazı logosu (saydam zemin): kanal açıklaması, belge, sunum
+- istihbar-ikon              Telegram profil resmi ve uygulama simgesi (640 x 640, kâğıt zemin; Telegram daireye kırpar)
+"-koyu-zemin" ekli dosyalar koyu zemin içindir: yazı kâğıt rengine döner, kırmızı noktalar aynı kalır.
+
+Fikir: "istihbar"daki iki i'nin noktası kırmızı; iki nokta (··) Mors'ta "İ". İkon logodaki i'nin kendisidir.
+Kurallar: kırmızı yalnız noktalarda; döndürme, gölge, kontur, başka yazı tipiyle yeniden yazma yok.
+Renkler: kırmızı #d92a1c, mürekkep #15171a, kâğıt #f6f4ee. Yazı tipi: IBM Plex Mono SemiBold (SIL OFL 1.1, brand/yazi/OFL.txt).
