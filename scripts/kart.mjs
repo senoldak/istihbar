@@ -1,12 +1,12 @@
-// istihbar haber kartı (1280 x 720 PNG): kâğıt zemin, solda üstte logo, sağda üstte saat, ortada büyük başlık,
-// altta kaynak. Haberin fotoğrafı kullanılmaz (telif); kart yalnız yazı ve kimlikten oluşur.
+// istihbar haber kartı (1280 x 720 PNG): kâğıt zemin, solda üstte logo, sağda üstte saat, büyük başlık. Kaynak adı yok
+// (kaynaksız kanal). Haberin fotoğrafı kullanılmaz (telif); kart yalnız yazı ve kimlikten oluşur.
 import sharp from 'sharp';
 import { genislik, logoYazisi, MONO, RENK, SANS, satirla, svg, yazi } from './kimlik.mjs';
 
 const G = 1280;
 const Y = 720;
 const KENAR = 72;
-const BASLIK_ALANI = { ust: 196, alt: 592 };
+const BASLIK_ALANI = { ust: 196, alt: 660 };
 
 // Başlık en büyük boyda başlar, 4 satıra sığana kadar küçülür.
 function baslikYerlestir(baslik) {
@@ -40,7 +40,7 @@ function rozet(tur) {
   return `<rect x="${kutu.x}" y="${kutu.y}" width="${kutu.g.toFixed(1)}" height="${kutu.y2}" rx="16" ${dolgu}${cizgi}/>` + ic.ic;
 }
 
-export function kartSvg({ baslik, kaynak, yayin }, { rozetTuru = 'seffaf' } = {}) {
+export function kartSvg({ baslik, yayin }, { rozetTuru = 'seffaf' } = {}) {
   let ic = rozet(rozetTuru);
   if (yayin) {
     const saat = saatTr(yayin);
@@ -50,8 +50,6 @@ export function kartSvg({ baslik, kaynak, yayin }, { rozetTuru = 'seffaf' } = {}
   const blok = satirlar.length * aralik;
   let taban = BASLIK_ALANI.ust + (BASLIK_ALANI.alt - BASLIK_ALANI.ust - blok) / 2 + boy * 0.92;
   for (const s of satirlar) ic += yazi(SANS, s, KENAR, taban, boy, RENK.murekkep), (taban += aralik);
-  ic += `<rect x="${KENAR}" y="618" width="${G - KENAR * 2}" height="2" fill="${RENK.cizgi}"/>`;
-  ic += yazi(MONO, kaynak, KENAR, 672, 30, RENK.gri);
   return svg(G, Y, ic, RENK.kagit);
 }
 

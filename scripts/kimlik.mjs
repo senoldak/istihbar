@@ -49,8 +49,20 @@ export function logoYazisi(metin, x, taban, boy, renk) {
   return { ic: `<path d="${d}" fill="${renk}"/>${daireler}`, genislik: imlec - x - ARALIK * boy };
 }
 
+// Testler için: yol olarak çizilen yazı SVG'den geri okunamaz; kayıt açıkken her yazı metni burada toplanır.
+let kayit = null;
+export const yaziKaydiBaslat = () => (kayit = []);
+export function yaziKaydiBitir() {
+  const k = kayit;
+  kayit = null;
+  return k;
+}
+
 /** Düz yazı (yol olarak). */
-export const yazi = (font, metin, x, taban, boy, renk) => `<path d="${font.getPath(metin, x, taban, boy).toPathData(2)}" fill="${renk}"/>`;
+export function yazi(font, metin, x, taban, boy, renk) {
+  if (kayit) kayit.push(metin);
+  return `<path d="${font.getPath(metin, x, taban, boy).toPathData(2)}" fill="${renk}"/>`;
+}
 export const genislik = (font, metin, boy) => font.getAdvanceWidth(metin, boy);
 
 /** Kelime kelime satırlara böler; sığmayan tek kelime kendi satırında kalır. */

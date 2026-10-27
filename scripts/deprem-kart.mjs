@@ -67,12 +67,7 @@ export function depremKartSvg(d) {
   ic += yazi(SANS, 'büyüklüğünde deprem', sol, ky + 202, 28, RENK.gri);
   const alt = [d.derinlik != null ? `Derinlik ${virgul(d.derinlik)} km` : null, d.yayin ? saatTr(d.yayin) : null].filter(Boolean).join(' · ');
   ic += yazi(MONO, alt, sol, ky + 254, 24, RENK.gri);
-
-  // Kaynak ve harita atfı kutunun dışında, karşı alt köşede.
-  const atif = `Kaynak: ${d.kaynak} · Harita: Natural Earth`;
-  const ax = kx === 48 ? G - 40 - genislik(MONO, atif, 18) : 40;
-  ic += `<rect x="${ax - 10}" y="${Y - 46}" width="${(genislik(MONO, atif, 18) + 20).toFixed(1)}" height="32" rx="6" fill="#ffffff" fill-opacity="0.8"/>`;
-  ic += yazi(MONO, atif, ax, Y - 24, 18, RENK.gri);
+  // Kaynak ve harita atfı yok (kaynaksız kanal; Natural Earth kamu malı, atıf gerekmez).
   return svg(G, Y, ic);
 }
 
