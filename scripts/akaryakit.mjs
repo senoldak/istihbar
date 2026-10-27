@@ -32,7 +32,7 @@ export function akaryakitFiyatlari(html) {
 /** Kare iş 'akaryakit': sayfayı okur, vesaire'ye bildirir; kartı vesaire açarsa ('zam' işi) sonraki turda çizilir. */
 export async function akaryakitBildir(is) {
   const { VESAIRE_URL, yetki, fetchFn = fetch } = is.ortam ?? {};
-  const r = await fetchFn(FIYAT_SAYFASI, { headers: { 'user-agent': 'Mozilla/5.0 (compatible; istihbar)', 'accept-language': 'tr' } });
+  const r = await fetchFn(FIYAT_SAYFASI, { headers: { 'user-agent': 'Mozilla/5.0 (compatible; istihbar)', 'accept-language': 'tr' }, signal: AbortSignal.timeout(15_000) });
   if (!r.ok) throw new Error(`akaryakıt sayfası HTTP ${r.status}`);
   const fiyatlar = akaryakitFiyatlari(await r.text());
   const b = await fetchFn(`${VESAIRE_URL}/istihbar/akaryakit`, {

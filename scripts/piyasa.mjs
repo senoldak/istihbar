@@ -5,6 +5,7 @@
 const YAHOO = (s) => `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(s)}?range=1mo&interval=1d`;
 const STOOQ = (s) => `https://stooq.com/q/d/l/?s=${encodeURIComponent(s)}&i=d`;
 const UA = { 'user-agent': 'Mozilla/5.0 (compatible; istihbar)' };
+const SURE = 10_000; // asılı kalan istek Actions işini (5 dk) durdurmasın
 const GUN = 86_400_000;
 const ONS_GRAM = 31.1035;
 
@@ -30,7 +31,7 @@ export function sayi(x, basamak) {
 
 // Seri: [{ t (ms), k (kapanış) }], eskiden yeniye, geçersiz kapanışlar atılmış.
 async function yahooSeri(sembol, fetchFn) {
-  const r = await fetchFn(YAHOO(sembol), { headers: UA });
+  const r = await fetchFn(YAHOO(sembol), { headers: UA, signal: AbortSignal.timeout(SURE) });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   const s = (await r.json())?.chart?.result?.[0];
   const t = s?.timestamp ?? [];
@@ -38,7 +39,7 @@ async function yahooSeri(sembol, fetchFn) {
   return t.map((x, i) => ({ t: x * 1000, k: k[i] })).filter((p) => Number.isFinite(p.k));
 }
 async function stooqSeri(sembol, fetchFn) {
-  const r = await fetchFn(STOOQ(sembol), { headers: UA });
+  const r = await fetchFn(STOOQ(sembol), { headers: UA, signal: AbortSignal.timeout(SURE) });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   return (await r.text())
     .trim()

@@ -78,3 +78,14 @@ test('ekonomi kartı 1080x1080 PNG; yarıdan fazlası eksikse fırlatır', async
   assert.deepEqual([m.width, m.height], [1080, 1080]);
   await assert.rejects(() => kareCiz({ anahtar: 'x', tur: 'ekonomi', veri: { baslik: 'Piyasalar', alt: '' }, ortam: { fetchFn: sahteAg({}) } }));
 });
+
+test('piyasa ve akaryakıt istekleri zaman aşımıyla yapılır (asılı kalan istek Actions işini durdurmasın)', async () => {
+  const sinyaller = [];
+  const fetchFn = async (url, ayar) => (sinyaller.push(Boolean(ayar?.signal)), new Response('yok', { status: 404 }));
+  await piyasaVerisi(fetchFn);
+  assert.ok(sinyaller.length > 0 && sinyaller.every(Boolean));
+  const { akaryakitBildir } = await import('../akaryakit.mjs');
+  sinyaller.length = 0;
+  await assert.rejects(() => akaryakitBildir({ anahtar: 'akaryakit:x', ortam: { VESAIRE_URL: 'https://v.test', yetki: {}, fetchFn } }));
+  assert.deepEqual(sinyaller, [true]);
+});

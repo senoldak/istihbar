@@ -13,8 +13,9 @@ const ortam = { VESAIRE_URL, yetki };
 let hata = 0;
 for (let tur = 0; tur < 5; tur++) {
   const kr = await fetch(`${VESAIRE_URL}/istihbar/kare-kuyruk`, { headers: yetki });
-  if (!kr.ok) throw new Error(`kare kuyruğu HTTP ${kr.status}`);
-  const isler = await kr.json();
+  // 404: vesaire henüz kare kuyruğu olmayan sürümde (deploy arası); haber kartları yine çizilir.
+  if (!kr.ok && kr.status !== 404) throw new Error(`kare kuyruğu HTTP ${kr.status}`);
+  const isler = kr.ok ? await kr.json() : [];
   for (const is of isler) {
     let png = null;
     try {
@@ -49,7 +50,8 @@ for (let tur = 0; tur < 5; tur++) {
     form.set('kart', new Blob([await ciz(h)], { type: 'image/png' }), 'kart.png');
     const g = await fetch(`${VESAIRE_URL}/istihbar/kart`, { method: 'POST', headers: yetki, body: form });
     const { sonuc } = await g.json().catch(() => ({ sonuc: `HTTP ${g.status}` }));
-    console.log(`${sonuc}: ${h.baslik}`);
+    // Herkese açık Actions kaydına kaynağın başlığı değil, istihbar'ın başlığı yazılır.
+    console.log(`${sonuc}: ${h.yazi?.baslik ?? h.baslik}`);
     if (sonuc === 'hata' || !g.ok) hata++;
   }
 }
