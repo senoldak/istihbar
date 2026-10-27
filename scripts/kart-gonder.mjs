@@ -1,18 +1,6 @@
 // GitHub Actions'ta çalışır: vesaire'deki kart kuyruğunu çeker, her haber için istihbar kartını çizer ve vesaire'ye
 // yollar (Telegram'a vesaire gönderir; bot token'ı burada yok). Ortam: VESAIRE_URL, KART_ANAHTARI.
-import { depremKartPng } from './deprem-kart.mjs';
-import { kartPng } from './kart.mjs';
-
-// Depremde haritalı kart; ek veri bozuksa ya da yoksa düz haber kartı.
-async function ciz(h) {
-  try {
-    const ek = h.ek ? JSON.parse(h.ek) : null;
-    if (ek && Number.isFinite(ek.enlem) && Number.isFinite(ek.boylam)) return await depremKartPng({ ...ek, kaynak: h.kaynak, yayin: h.yayin });
-  } catch (e) {
-    console.log(`deprem kartı çizilemedi, düz kart: ${e.message}`);
-  }
-  return kartPng(h);
-}
+import { ciz } from './ciz.mjs';
 
 const { VESAIRE_URL, KART_ANAHTARI } = process.env;
 if (!VESAIRE_URL || !KART_ANAHTARI) throw new Error('VESAIRE_URL ve KART_ANAHTARI gerekli');
