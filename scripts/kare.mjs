@@ -3,7 +3,9 @@
 // Kaynak adı yok. Taslak: mecmua/docs/istihbar-kartlar/taslak-bulten-karti.png.
 import sharp from 'sharp';
 import { genislik, logoYazisi, MONO, RENK, SANS, satirla, svg, yazi } from './kimlik.mjs';
+import { akaryakitBildir } from './akaryakit.mjs';
 import { piyasaVerisi } from './piyasa.mjs';
+import { ozelKartSvg } from './sablon.mjs';
 
 export const S = 1080;
 export const K = 64;
@@ -89,6 +91,14 @@ const CIZICILER = {
   hafta: (v) => haftaKartSvg(v),
   bugun: (v) => bugunKartSvg(v),
   ekonomi: (v, is) => ekonomiKartSvg(v, is),
+  // Akaryakıt: önce fiyat bildirimi (kart yok, iş 'bos' olur); değişim varsa vesaire ürün başına 'zam' işi açar.
+  akaryakit: (_v, is) => akaryakitBildir(is),
+  zam: (v) =>
+    ozelKartSvg({
+      kart: { sablon: 'zam', once: { etiket: 'Eski', deger: v.eski }, sonra: { etiket: 'Yeni', deger: v.yeni }, birim: 'TL', aciklama: `${v.urun === 'benzin' ? 'Benzin' : 'Motorin'} · litre · ${v.yer}` },
+      baslik: v.baslik,
+      yayin: v.yayin,
+    }),
 };
 
 /** Kare iş → PNG. null: gönderilecek kart yok (çağıran /istihbar/kare-bos'a bildirir). Bilinmeyen tür fırlatır. */
