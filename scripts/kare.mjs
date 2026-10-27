@@ -3,6 +3,7 @@
 // Kaynak adı yok. Taslak: mecmua/docs/istihbar-kartlar/taslak-bulten-karti.png.
 import sharp from 'sharp';
 import { genislik, logoYazisi, MONO, RENK, SANS, satirla, svg, yazi } from './kimlik.mjs';
+import { piyasaVerisi } from './piyasa.mjs';
 
 export const S = 1080;
 export const K = 64;
@@ -52,10 +53,42 @@ export const haftaKartSvg = bultenKartSvg;
 export const bugunKartSvg = (v) =>
   svg(S, S, kareUst('Bugün', v.tarih) + liste(v.ogeler.slice(0, 6), { etiket: (o) => o.saat ?? '', girinti: 120 }), RENK.kagit);
 
+// Ekonomi kartı ("Piyasalar"): on satır, değer + günlük + haftalık değişim; grafik yok. Taslak: taslak-ekonomi-karti.png.
+const YESIL = '#1f7a4d';
+const ucgen = (x, y, yukari, renk) =>
+  yukari ? `<path d="M${x},${y + 8} L${x + 18},${y + 8} L${x + 9},${y - 8} Z" fill="${renk}"/>` : `<path d="M${x},${y - 8} L${x + 18},${y - 8} L${x + 9},${y + 8} Z" fill="${renk}"/>`;
+function degisimYaz(d, birim, sag, orta) {
+  if (d == null) return yazi(MONO, '—', sag - genislik(MONO, '—', 28), orta, 28, RENK.gri);
+  const yuvarlak = birim === 'bp' ? Math.round(d) : Math.round(d * 100) / 100;
+  const renk = yuvarlak > 0 ? YESIL : yuvarlak < 0 ? RENK.kirmizi : RENK.gri;
+  const metin = birim === 'bp' ? `${Math.abs(yuvarlak)} bp` : `%${Math.abs(yuvarlak).toFixed(2).replace('.', ',')}`;
+  const x = sag - genislik(MONO, metin, 28);
+  return yazi(MONO, metin, x, orta, 28, renk) + (yuvarlak === 0 ? '' : ucgen(x - 28, orta - 10, yuvarlak > 0, renk));
+}
+export async function ekonomiKartSvg(v, is) {
+  const { satirlar, eksik } = await piyasaVerisi(is?.ortam?.fetchFn ?? fetch);
+  if (eksik > satirlar.length / 2) throw new Error(`piyasa verisi eksik (${eksik}/${satirlar.length})`);
+  let ic = kareUst(v.baslik ?? 'Piyasalar', v.alt);
+  ic += yazi(MONO, 'Günlük', 790 - genislik(MONO, 'Günlük', 22), 318, 22, RENK.gri);
+  ic += yazi(MONO, 'Haftalık', S - K - genislik(MONO, 'Haftalık', 22), 318, 22, RENK.gri);
+  satirlar.forEach((s, i) => {
+    const y = 330 + i * 64;
+    const orta = y + 44;
+    ic += yazi(SANS, s.ad, K, orta, 32, RENK.murekkep);
+    ic += yazi(MONO, s.deger, 560 - genislik(MONO, s.deger, 32), orta, 32, s.deger === '—' ? RENK.gri : RENK.murekkep);
+    ic += degisimYaz(s.gunluk, s.birim, 790, orta);
+    ic += degisimYaz(s.haftalik, s.birim, S - K, orta);
+    if (i < satirlar.length - 1) ic += `<rect x="${K}" y="${y + 63}" width="${S - 2 * K}" height="1.5" fill="${RENK.cizgi}"/>`;
+  });
+  ic += yazi(MONO, 'Yatırım tavsiyesi değildir', K, S - 40, 22, RENK.gri);
+  return svg(S, S, ic, RENK.kagit);
+}
+
 const CIZICILER = {
   bulten: (v) => bultenKartSvg(v),
   hafta: (v) => haftaKartSvg(v),
   bugun: (v) => bugunKartSvg(v),
+  ekonomi: (v, is) => ekonomiKartSvg(v, is),
 };
 
 /** Kare iş → PNG. null: gönderilecek kart yok (çağıran /istihbar/kare-bos'a bildirir). Bilinmeyen tür fırlatır. */
