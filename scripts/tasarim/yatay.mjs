@@ -4,6 +4,7 @@
 import sharp from 'sharp';
 import { haritaSvg } from './harita.mjs';
 import { BASLIK, ETIKET, genislik, kutuKaydet, logoBlok, RENK, sigdir, svg, yazi } from './kimlik.mjs';
+import { VERI_GORSELLERI } from './veri.mjs';
 
 export const G = 1280;
 export const Y = 720;
@@ -13,8 +14,8 @@ const TABAN = 624; // taban çizgisinin y'si; altı 96 px
 const UB_BOY = 23;
 const UB_ARALIK = 0.14;
 
-// Veri görselleri (Task 4): şablon adı → ({ kart, alan: {x, y, g, h} }) → svg içi.
-export const GORSELLER = {};
+// Veri görselleri: şablon adı → ({ kart, alan: {x, y, g, h} }) → svg içi (veri.mjs).
+export const GORSELLER = VERI_GORSELLERI;
 
 function ustBaslik({ kategori, saat, sonDakika, tsi }) {
   const zaman = tsi ? `${saat} TSİ` : saat;
