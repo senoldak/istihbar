@@ -71,11 +71,11 @@ test('null kapanışlar atlanır, eksik satır tire olur', async () => {
   for (const s of v.satirlar) for (const x of [s.gunluk, s.haftalik]) assert.ok(x === null || Number.isFinite(x));
 });
 
-test('ekonomi kartı 1080x1080 PNG; yarıdan fazlası eksikse fırlatır', async () => {
+test('ekonomi kartı 1080x1350 PNG; yarıdan fazlası eksikse fırlatır', async () => {
   const ortam = { fetchFn: sahteAg(TAM) };
   const png = await kareCiz({ anahtar: 'ekonomi:sabah:2026-10-28', tur: 'ekonomi', veri: { baslik: 'Piyasalar', alt: 'Sabah · 28 Ekim 2026 · 08:00' }, ortam });
   const m = await sharp(png).metadata();
-  assert.deepEqual([m.width, m.height], [1080, 1080]);
+  assert.deepEqual([m.width, m.height], [1080, 1350]);
   await assert.rejects(() => kareCiz({ anahtar: 'x', tur: 'ekonomi', veri: { baslik: 'Piyasalar', alt: '' }, ortam: { fetchFn: sahteAg({}) } }));
 });
 

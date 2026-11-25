@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import sharp from 'sharp';
 import { akaryakitFiyatlari } from '../akaryakit.mjs';
 import { kareCiz } from '../kare.mjs';
-import { yaziKaydiBaslat, yaziKaydiBitir } from '../kimlik.mjs';
+import { yaziKaydiBaslat, yaziKaydiBitir } from '../tasarim/kimlik.mjs';
 
 const ORNEK = fs.readFileSync(new URL('./ornek/po.html', import.meta.url), 'utf8');
 
@@ -40,11 +40,11 @@ test('akaryakıt işi fiyatları vesaire\'ye bildirir, kart çizmez', async () =
   assert.equal(JSON.parse(post.govde).anahtar, 'akaryakit:sabah:2026-10-28');
 });
 
-test('zam kartı 1280x720, şirket adı yok', async () => {
+test('zam kartı 1080x1350, şirket adı yok', async () => {
   yaziKaydiBaslat();
-  const png = await kareCiz({ anahtar: 'akaryakit:sabah:2026-10-28:benzin', tur: 'zam', veri: { urun: 'benzin', yer: 'İstanbul Avrupa yakası', eski: 76.3, yeni: 77.45, baslik: 'Benzine 1,15 lira zam' } });
+  const png = await kareCiz({ anahtar: 'akaryakit:sabah:2026-10-28:benzin', tur: 'zam', veri: { urun: 'benzin', yer: 'İstanbul Avrupa yakası', eski: 76.3, yeni: 77.45, baslik: 'Benzine 1,15 lira zam', yayin: Date.parse('2026-10-28T16:00:00Z') } });
   const yazilar = yaziKaydiBitir();
   const m = await sharp(png).metadata();
-  assert.deepEqual([m.width, m.height], [1280, 720]);
+  assert.deepEqual([m.width, m.height], [1080, 1350]);
   assert.ok(!yazilar.some((y) => /Petrol|Ofisi|PO\b/.test(y)));
 });
