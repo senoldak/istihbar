@@ -1,3 +1,6 @@
+Archivo-DarExtraBold.ttf, Archivo-DarBold.ttf: Copyright 2020 The Archivo Project Authors (https://github.com/Omnibus-Type/Archivo)
+(Archivo değişken yazı tipinden wdth=80, wght=800/700 olarak kesildi.)
+
 Copyright © 2017 IBM Corp. with Reserved Font Name "Plex"
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
