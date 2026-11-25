@@ -1,7 +1,7 @@
 // Yeni kimlik modülü (spec 2026-11-25 §4): renkler, Archivo dar kesimleri, sığdırma, logo bloğu, kutu kaydı.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { BASLIK, ETIKET, genislik, kutuKaydet, kutuKaydiBaslat, kutuKaydiBitir, logoBlok, RENK, sigdir, svg, yazi, yaziKaydiBaslat, yaziKaydiBitir } from '../tasarim/kimlik.mjs';
+import { BASLIK, ETIKET, genislik, KELIME, kutuKaydet, kutuKaydiBaslat, kutuKaydiBitir, logoTelgraf, RENK, sigdir, svg, telgrafSimge, yazi, yaziKaydiBaslat, yaziKaydiBitir } from '../tasarim/kimlik.mjs';
 
 test('renkler spec §4.2 değerlerinde', () => {
   assert.equal(RENK.zemin, '#f4f2ed');
@@ -42,12 +42,28 @@ test('yazi harf aralığıyla genişler', () => {
   assert.match(yazi(ETIKET, 'DEPREM', 0, 20, 23, RENK.ikincil, { aralik: 0.14 }), /^<path d="M/);
 });
 
-test('logoBlok İSTİHBAR yazar, vurgu rengi taşır', () => {
+test('telgraf simgesi: dört şerit, 5 çizgi + 9 nokta, kırmızı yalnız ilk nokta', () => {
+  for (const boy of [16, 32, 200]) {
+    const s = telgrafSimge(0, 0, boy);
+    assert.equal((s.match(/<rect /g) ?? []).length, 5, String(boy));
+    assert.equal((s.match(/<circle /g) ?? []).length, 9, String(boy));
+    assert.equal((s.match(/#d0211a/g) ?? []).length, 1, String(boy));
+  }
+});
+
+test('logoTelgraf: simge + küçük harf istihbar; koyu sürümde mürekkep yok', () => {
   yaziKaydiBaslat();
-  const l = logoBlok(64, 600, 48);
-  assert.deepEqual(yaziKaydiBitir(), ['İSTİHBAR']);
-  assert.match(l.ic, /#d0211a/);
-  assert.ok(l.genislik > 100);
+  const l = logoTelgraf(64, 600, 48);
+  assert.deepEqual(yaziKaydiBitir(), ['istihbar']);
+  assert.equal((l.ic.match(/#d0211a/g) ?? []).length, 1);
+  assert.ok(l.genislik > 150 && l.genislik < 400, String(l.genislik));
+  const k = logoTelgraf(0, 0, 48, { koyu: true });
+  assert.ok(!k.ic.includes('#15181d'));
+  assert.match(k.ic, /#f4f2ed/);
+});
+
+test('kelime yazı tipi normal genişlik (dar başlık kesiminden geniş)', () => {
+  assert.ok(genislik(KELIME, 'istihbar', 100) > genislik(BASLIK, 'istihbar', 100) * 1.1);
 });
 
 test('kutu kaydı yerleşen öğeleri toplar', () => {

@@ -21,6 +21,8 @@ export const RENK = {
 const yol = (ad) => fileURLToPath(new URL(`../../brand/yazi/${ad}`, import.meta.url));
 export const BASLIK = opentype.loadSync(yol('Archivo-DarExtraBold.ttf'));
 export const ETIKET = opentype.loadSync(yol('Archivo-DarBold.ttf'));
+// Logo yazısı: normal genişlik Archivo Bold (spec 2026-11-26).
+export const KELIME = opentype.loadSync(yol('Archivo-Bold.ttf'));
 
 let yaziKaydi = null;
 export const yaziKaydiBaslat = () => (yaziKaydi = []);
@@ -94,15 +96,43 @@ export function sigdir(font, metin, { boy, enAz, adim = 2, enGenis, enCokSatir }
   return { boy: enAz, satirlar: s, kesildi: true };
 }
 
-/** Logo: vurgu renginde blok, içinde beyaz İSTİHBAR. (x, y) bloğun sol üstü; yukseklik bloğun yüksekliği. */
-export function logoBlok(x, y, yukseklik) {
-  const boy = yukseklik * 0.62;
-  const aralik = 0.07;
-  const pay = yukseklik * 0.36;
-  const gen = genislik(BASLIK, 'İSTİHBAR', boy, { aralik }) + 2 * pay;
+// Telgraf şeridi simgesi (spec 2026-11-26): 200×200 kutuda dört şerit; n nokta, c çizgi; kırmızı yalnız ilk nokta.
+const SOLUK = { acik: '#d6d0c4', koyu: '#4a4d52' };
+const SERITLER = [
+  [['n', 'v'], ['c', 'm'], ['n', 'm']],
+  [['c', 'm'], ['n', 'm'], ['n', 'm'], ['n', 's']],
+  [['n', 'm'], ['c', 'm'], ['c', 's']],
+  [['n', 's'], ['n', 's'], ['c', 's'], ['n', 's']],
+];
+
+/** Simge: (x, y) sol üst, boy kenar uzunluğu (px). */
+export function telgrafSimge(x, y, boy, { koyu = false } = {}) {
+  const renk = { v: RENK.vurgu, m: koyu ? RENK.zemin : RENK.murekkep, s: koyu ? SOLUK.koyu : SOLUK.acik };
+  let ic = '';
+  SERITLER.forEach((satir, i) => {
+    const sy = 34 + i * 44;
+    let sx = 8;
+    for (const [tur, r] of satir) {
+      if (tur === 'n') {
+        ic += `<circle cx="${sx + 14}" cy="${sy}" r="14" fill="${renk[r]}"/>`;
+        sx += 40;
+      } else {
+        ic += `<rect x="${sx}" y="${sy - 14}" width="62" height="28" rx="14" fill="${renk[r]}"/>`;
+        sx += 74;
+      }
+    }
+  });
+  return `<g transform="translate(${x.toFixed(1)},${y.toFixed(1)}) scale(${(boy / 200).toFixed(4)})">${ic}</g>`;
+}
+
+/** Logo: simge + küçük harf "istihbar". (x, y) simgenin sol üstü; yukseklik simge kenarı. */
+export function logoTelgraf(x, y, yukseklik, { koyu = false } = {}) {
+  const boy = yukseklik * 0.78;
+  const ara = yukseklik * 0.28;
+  const aralik = -0.02;
   const taban = y + yukseklik / 2 + boy * 0.36;
-  const ic = `<rect x="${x}" y="${y}" width="${gen.toFixed(1)}" height="${yukseklik}" fill="${RENK.vurgu}"/>` + yazi(BASLIK, 'İSTİHBAR', x + pay, taban, boy, '#ffffff', { aralik });
-  return { ic, genislik: gen };
+  const ic = telgrafSimge(x, y, yukseklik, { koyu }) + yazi(KELIME, 'istihbar', x + yukseklik + ara, taban, boy, koyu ? RENK.zemin : RENK.murekkep, { aralik });
+  return { ic, genislik: yukseklik + ara + genislik(KELIME, 'istihbar', boy, { aralik }) };
 }
 
 export const svg = (g, y, ic) =>

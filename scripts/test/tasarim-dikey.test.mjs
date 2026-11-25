@@ -71,3 +71,10 @@ test('üst başlıklar', () => {
   assert.match(y, /HAFTA · PAZAR 20:00/);
   assert.match(y, /17 – 23 KASIM 2026/);
 });
+
+test('dikey kart tabanında yeni logo', () => {
+  yaziKaydiBaslat();
+  DIKEY.bulten(BULTEN);
+  const y = yaziKaydiBitir();
+  assert.ok(y.includes('istihbar') && !y.includes('İSTİHBAR'));
+});

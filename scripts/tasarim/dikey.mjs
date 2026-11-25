@@ -1,7 +1,7 @@
 // Dikey kartlar (1080×1350, 4:5; spec 2026-11-25 §4.5, §5.3): bülten, haftanın özeti, bugün, piyasalar, akaryakıt zammı.
 // İskelet: üst başlık, başlık, gövdeyi dolduran liste ya da tablo, çizgili taban (logo + tarih). Veri vesaire'nin kare iş
 // kuyruğundan gelir; biçimleri bugünkü işlerle aynı.
-import { BASLIK, ETIKET, genislik, kutuKaydet, logoBlok, RENK, sigdir, svg, yazi } from './kimlik.mjs';
+import { BASLIK, ETIKET, genislik, kutuKaydet, logoTelgraf, RENK, sigdir, svg, yazi } from './kimlik.mjs';
 import { piyasaVerisi } from '../piyasa.mjs';
 import { sayiTr } from './veri.mjs';
 
@@ -28,7 +28,7 @@ function bas(ust, baslik) {
 }
 
 function taban(tarih) {
-  const l = logoBlok(K, TABAN + 33, 66);
+  const l = logoTelgraf(K, TABAN + 36, 60);
   const tg = genislik(ETIKET, buyuk(tarih), 30, { aralik: 0.12 });
   kutuKaydet('taban', 0, TABAN, G, Y - TABAN);
   return `<rect x="0" y="${TABAN}" width="${G}" height="2" fill="${RENK.cizgi}"/>${l.ic}${yazi(ETIKET, buyuk(tarih), G - K - tg, TABAN + 66 + 30 * 0.36, 30, RENK.ikincil, { aralik: 0.12 })}`;

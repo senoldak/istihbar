@@ -3,7 +3,7 @@
 // haritalı kartta minimal panel (solda başlık ve bilgi şeridi, sağda kâğıda eriyen harita); altta çizgili taban.
 import sharp from 'sharp';
 import { haritaSvg } from './harita.mjs';
-import { BASLIK, ETIKET, genislik, kutuKaydet, logoBlok, RENK, sigdir, svg, yazi } from './kimlik.mjs';
+import { BASLIK, ETIKET, genislik, kutuKaydet, logoTelgraf, RENK, sigdir, svg, yazi } from './kimlik.mjs';
 import { VERI_GORSELLERI } from './veri.mjs';
 
 export const G = 1280;
@@ -50,7 +50,7 @@ function baslikYaz(metin, { boy, enAz, enCokSatir, enGenis, ust }) {
 }
 
 function taban(tarih) {
-  const l = logoBlok(K, TABAN + 24, 48);
+  const l = logoTelgraf(K, TABAN + 26, 44);
   const tb = TABAN + 48 + 22 * 0.36;
   const tg = genislik(ETIKET, tarih, 22, { aralik: 0.12 });
   kutuKaydet('taban', 0, TABAN, G, Y - TABAN);

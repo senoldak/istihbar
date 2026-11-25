@@ -1,28 +1,32 @@
-// Logo paketi (spec 2026-11-25 §7): blok logo ve kanal fotoğrafı (kırmızı kare, ortada beyaz İ).
+// Logo paketi (spec 2026-11-26): Telgraf şeridi simgesi + küçük harf "istihbar"; kanal fotoğrafı kâğıt zeminde simge.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { ikonSvg, logoSvg } from '../logo-paketi.mjs';
+import { ikonSvg, isaretSvg, logoSvg } from '../logo-paketi.mjs';
 import { yaziKaydiBaslat, yaziKaydiBitir } from '../tasarim/kimlik.mjs';
 
-test('logo: vurgu bloğunda İSTİHBAR; koyu zemin sürümü mürekkep zeminli', () => {
+test('logo: simge + istihbar; kırmızı tek; koyu sürüm mürekkep zeminli, yazı kâğıt rengi', () => {
   yaziKaydiBaslat();
   const a = logoSvg(false);
-  assert.deepEqual(yaziKaydiBitir(), ['İSTİHBAR']);
-  assert.match(a, /#d0211a/);
-  assert.ok(!a.includes('#15181d'));
-  assert.match(logoSvg(true), /fill="#15181d"/);
+  assert.deepEqual(yaziKaydiBitir(), ['istihbar']);
+  assert.equal((a.match(/#d0211a/g) ?? []).length, 1);
+  const k = logoSvg(true);
+  assert.match(k, /<rect width="100%" height="100%" fill="#15181d"\/>/);
 });
 
-test('ikon: 640×640 kırmızı zemin, beyaz İ daire içinde ortalı', () => {
+test('işaret: yalnız simge, yazı yok', () => {
   yaziKaydiBaslat();
+  const s = isaretSvg(false);
+  assert.deepEqual(yaziKaydiBitir(), []);
+  assert.equal((s.match(/<circle /g) ?? []).length, 9);
+});
+
+test('ikon: 640×640 kâğıt zemin, simge Telegram daire kırpımının içinde ve ortalı', () => {
   const s = ikonSvg();
-  assert.deepEqual(yaziKaydiBitir(), ['İ']);
   assert.match(s, /width="640" height="640"/);
-  assert.match(s, /<rect width="100%" height="100%" fill="#d0211a"\/>/);
-  const sayilar = [...s.matchAll(/[ML]([\d.]+) ([\d.]+)/g)].map((m) => [Number(m[1]), Number(m[2])]);
-  const xs = sayilar.map((p) => p[0]);
-  const ys = sayilar.map((p) => p[1]);
-  const orta = [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2];
-  assert.ok(Math.abs(orta[0] - 320) < 8 && Math.abs(orta[1] - 320) < 8, JSON.stringify(orta));
-  for (const [x, y] of sayilar) assert.ok(Math.hypot(x - 320, y - 320) < 300, 'harf daire kırpımının içinde');
+  assert.match(s, /<rect width="100%" height="100%" fill="#f4f2ed"\/>/);
+  const m = s.match(/translate\(([\d.]+),([\d.]+)\) scale\(([\d.]+)\)/);
+  const [x, y, k] = m.slice(1).map(Number);
+  // Simgenin kapladığı kutu (200 birimde x 8..192, y 20..182) merkezden 300 px'ten uzağa taşmaz.
+  for (const [ux, uy] of [[8, 20], [192, 20], [8, 182], [192, 182]]) assert.ok(Math.hypot(x + ux * k - 320, y + uy * k - 320) < 300, `${ux},${uy}`);
+  assert.ok(Math.abs(x + 100 * k - 320) < 12 && Math.abs(y + 101 * k - 320) < 12);
 });

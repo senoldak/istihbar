@@ -81,3 +81,11 @@ test('panel haritası kendi alanına kırpılır (sütunun ve tabanın arkasına
   assert.match(s, /<svg x="620" y="0" width="660" height="624"[^>]*overflow="hidden"/);
   assert.ok(!s.includes('translate(620,0)'));
 });
+
+test('kart tabanında yeni logo: küçük harf istihbar, kırmızı blok yok', () => {
+  yaziKaydiBaslat();
+  const s = yatayKartSvg({ ...ORTAK, baslik: 'x' });
+  const y = yaziKaydiBitir();
+  assert.ok(y.includes('istihbar') && !y.includes('İSTİHBAR'));
+  assert.ok(!/<rect x="64" y="648"/.test(s));
+});
