@@ -42,13 +42,15 @@ test('yazi harf aralığıyla genişler', () => {
   assert.match(yazi(ETIKET, 'DEPREM', 0, 20, 23, RENK.ikincil, { aralik: 0.14 }), /^<path d="M/);
 });
 
-test('telgraf simgesi: dört şerit, 5 çizgi + 9 nokta, kırmızı yalnız ilk nokta', () => {
+test('balonda telgraf simgesi: konturlu balon, içinde nokta · çizgi · nokta, kırmızı yalnız ilk nokta', () => {
   for (const boy of [16, 32, 200]) {
     const s = telgrafSimge(0, 0, boy);
-    assert.equal((s.match(/<rect /g) ?? []).length, 5, String(boy));
-    assert.equal((s.match(/<circle /g) ?? []).length, 9, String(boy));
+    assert.equal((s.match(/<path [^>]*fill="none"[^>]*stroke="#15181d"/g) ?? []).length, 1, `${boy}: balon konturu`);
+    assert.equal((s.match(/<rect /g) ?? []).length, 1, String(boy));
+    assert.equal((s.match(/<circle /g) ?? []).length, 2, String(boy));
     assert.equal((s.match(/#d0211a/g) ?? []).length, 1, String(boy));
   }
+  assert.ok(!telgrafSimge(0, 0, 200, { koyu: true }).includes('#15181d'));
 });
 
 test('logoTelgraf: simge + küçük harf istihbar; koyu sürümde mürekkep yok', () => {

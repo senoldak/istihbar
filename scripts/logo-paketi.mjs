@@ -1,4 +1,4 @@
-// istihbar logo paketi (brand/logo/, spec 2026-11-26): Telgraf şeridi simgesi + küçük harf "istihbar" (Archivo Bold).
+// istihbar logo paketi (brand/logo/, spec 2026-11-26): balonda telgraf simgesi + küçük harf "istihbar" (Archivo Bold).
 // Dosyalar: yatay logo (saydam ve koyu zemin), yalnız simge (işaret), kanal fotoğrafı (kâğıt zemin; Telegram daireye kırpar).
 // SVG (yazı glif yolu) ve PNG. Kullanım: node scripts/logo-paketi.mjs
 import fs from 'node:fs';
@@ -23,11 +23,11 @@ export function isaretSvg(koyu) {
   return sar(200 + 2 * pay, 200 + 2 * pay, telgrafSimge(pay, pay, 200, { koyu }), koyu ? RENK.murekkep : null);
 }
 
-/** Kanal fotoğrafı: kâğıt zemin, ortada simge; simgenin görsel merkezi (100, 101) kartın ortasına gelir. */
+/** Kanal fotoğrafı: kâğıt zemin, ortada simge; balonun görsel merkezi (100, 107; kuyruk dahil) kartın ortasına gelir. */
 export function ikonSvg(kenar = 640) {
   const boy = kenar * 0.62;
   const k = boy / 200;
-  return sar(kenar, kenar, telgrafSimge(kenar / 2 - 100 * k, kenar / 2 - 101 * k, boy), RENK.zemin);
+  return sar(kenar, kenar, telgrafSimge(kenar / 2 - 100 * k, kenar / 2 - 107 * k, boy), RENK.zemin);
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {

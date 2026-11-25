@@ -17,7 +17,7 @@ test('işaret: yalnız simge, yazı yok', () => {
   yaziKaydiBaslat();
   const s = isaretSvg(false);
   assert.deepEqual(yaziKaydiBitir(), []);
-  assert.equal((s.match(/<circle /g) ?? []).length, 9);
+  assert.equal((s.match(/<circle /g) ?? []).length, 2);
 });
 
 test('ikon: 640×640 kâğıt zemin, simge Telegram daire kırpımının içinde ve ortalı', () => {
@@ -26,7 +26,8 @@ test('ikon: 640×640 kâğıt zemin, simge Telegram daire kırpımının içinde
   assert.match(s, /<rect width="100%" height="100%" fill="#f4f2ed"\/>/);
   const m = s.match(/translate\(([\d.]+),([\d.]+)\) scale\(([\d.]+)\)/);
   const [x, y, k] = m.slice(1).map(Number);
-  // Simgenin kapladığı kutu (200 birimde x 8..192, y 20..182) merkezden 300 px'ten uzağa taşmaz.
-  for (const [ux, uy] of [[8, 20], [192, 20], [8, 182], [192, 182]]) assert.ok(Math.hypot(x + ux * k - 320, y + uy * k - 320) < 300, `${ux},${uy}`);
-  assert.ok(Math.abs(x + 100 * k - 320) < 12 && Math.abs(y + 101 * k - 320) < 12);
+  // Balonun kapladığı kutu (200 birimde kontur dahil x 7..193, y 27..186) merkezden 300 px'ten uzağa taşmaz;
+  // görsel merkez (100, 107) kartın ortasına gelir.
+  for (const [ux, uy] of [[7, 27], [193, 27], [7, 157], [193, 157], [46, 186]]) assert.ok(Math.hypot(x + ux * k - 320, y + uy * k - 320) < 300, `${ux},${uy}`);
+  assert.ok(Math.abs(x + 100 * k - 320) < 6 && Math.abs(y + 107 * k - 320) < 6);
 });

@@ -96,32 +96,19 @@ export function sigdir(font, metin, { boy, enAz, adim = 2, enGenis, enCokSatir }
   return { boy: enAz, satirlar: s, kesildi: true };
 }
 
-// Telgraf şeridi simgesi (spec 2026-11-26): 200×200 kutuda dört şerit; n nokta, c çizgi; kırmızı yalnız ilk nokta.
-const SOLUK = { acik: '#d6d0c4', koyu: '#4a4d52' };
-const SERITLER = [
-  [['n', 'v'], ['c', 'm'], ['n', 'm']],
-  [['c', 'm'], ['n', 'm'], ['n', 'm'], ['n', 's']],
-  [['n', 'm'], ['c', 'm'], ['c', 's']],
-  [['n', 's'], ['n', 's'], ['c', 's'], ['n', 's']],
-];
+// Balonda telgraf simgesi (spec 2026-11-26, değişiklik): 200×200 kutuda konturlu konuşma balonu, içinde tek satır
+// nokta · çizgi · nokta; kırmızı yalnız ilk nokta.
+const BALON = 'M44 34 H156 A30 30 0 0 1 186 64 V120 A30 30 0 0 1 156 150 H82 L46 180 L52 150 H44 A30 30 0 0 1 14 120 V64 A30 30 0 0 1 44 34 Z';
 
 /** Simge: (x, y) sol üst, boy kenar uzunluğu (px). */
 export function telgrafSimge(x, y, boy, { koyu = false } = {}) {
-  const renk = { v: RENK.vurgu, m: koyu ? RENK.zemin : RENK.murekkep, s: koyu ? SOLUK.koyu : SOLUK.acik };
-  let ic = '';
-  SERITLER.forEach((satir, i) => {
-    const sy = 34 + i * 44;
-    let sx = 8;
-    for (const [tur, r] of satir) {
-      if (tur === 'n') {
-        ic += `<circle cx="${sx + 14}" cy="${sy}" r="14" fill="${renk[r]}"/>`;
-        sx += 40;
-      } else {
-        ic += `<rect x="${sx}" y="${sy - 14}" width="62" height="28" rx="14" fill="${renk[r]}"/>`;
-        sx += 74;
-      }
-    }
-  });
+  const m = koyu ? RENK.zemin : RENK.murekkep;
+  // nokta r 12 (x 44–68), ara 10, çizgi 40×24 (x 78–118), ara 10, nokta (x 128–152); dikeyde y 92.
+  const ic =
+    `<path d="${BALON}" fill="none" stroke="${m}" stroke-width="13" stroke-linejoin="round"/>` +
+    `<circle cx="56" cy="92" r="12" fill="${RENK.vurgu}"/>` +
+    `<rect x="78" y="80" width="40" height="24" rx="12" fill="${m}"/>` +
+    `<circle cx="140" cy="92" r="12" fill="${m}"/>`;
   return `<g transform="translate(${x.toFixed(1)},${y.toFixed(1)}) scale(${(boy / 200).toFixed(4)})">${ic}</g>`;
 }
 

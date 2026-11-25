@@ -1,12 +1,12 @@
 istihbar logo paketi. Üretici: scripts/logo-paketi.mjs — elle düzenlemeyin, yeniden üretin.
 
-- istihbar-logo              Yatay logo (saydam zemin): Telgraf şeridi simgesi + "istihbar"; kanal açıklaması, belge, sunum
+- istihbar-logo              Yatay logo (saydam zemin): balonda telgraf simgesi + "istihbar"; kanal açıklaması, belge, sunum
 - istihbar-logo-koyu-zemin   Aynı logo mürekkep zeminde: simge ve yazı kâğıt rengine döner, kırmızı nokta aynı kalır
 - istihbar-isaret            Yalnız simge (saydam zemin); koyu zemin sürümü de var
 - istihbar-ikon              Telegram profil resmi ve uygulama simgesi (640 x 640, kâğıt zemin; Telegram daireye kırpar)
 
-Fikir: haber ajanslarının telgraf hattı; nokta ve çizgilerden dört şerit, ilk nokta kırmızı, alttaki şeritler soluk.
-Kurallar: kırmızı yalnız ilk noktada; döndürme, gölge, kontur, şerit ya da öğe ekleyip çıkarma, yazıyı başka yazı tipiyle
+Fikir: konuşma balonunda telgraf; mesaj (Telegram) ve haber ajanslarının telgraf hattı. Balonun içinde nokta · çizgi · nokta, ilk nokta kırmızı.
+Kurallar: kırmızı yalnız ilk noktada; döndürme, gölge, kontur, öğe ekleyip çıkarma, yazıyı başka yazı tipiyle
 yeniden yazma yok. Logonun çevresinde en az simgenin dörtte biri kadar boşluk kalır (dosyalarda bu boşluk var).
-Renkler: kırmızı #d0211a, mürekkep #15181d, soluk #d6d0c4, kâğıt #f4f2ed. Yazı tipi: Archivo Bold, normal genişlik
+Renkler: kırmızı #d0211a, mürekkep #15181d, kâğıt #f4f2ed. Yazı tipi: Archivo Bold, normal genişlik
 (SIL OFL 1.1, brand/yazi/OFL.txt).
