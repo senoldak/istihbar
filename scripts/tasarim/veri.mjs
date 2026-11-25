@@ -51,10 +51,13 @@ function meclis({ kart: k, alan }) {
 
 // Önce → sonra ve zam aynı dili kullanır: eski değer gri, ok vurgu, yeni değer mürekkep, yanda açıklama/fark.
 function onceSonra({ kart: k, alan }, { farkYaz }) {
-  const boy = Math.min(80, alan.h * 0.5);
-  const taban = ortaY(alan, boy * 1.3) + 22 + boy * 0.74;
   const once = degerTr(k.once.deger, k.birim);
   const sonra = degerTr(k.sonra.deger, k.birim);
+  // Boy hem yüksekliğe hem genişliğe göre: iki değer ve ok alana sığana kadar küçülür (sayı asla kesilmez).
+  const gen = (b) => genislik(BASLIK, once, b) + 32 + genislik(BASLIK, '→', b * 0.6) + 32 + genislik(BASLIK, sonra, b);
+  let boy = Math.min(80, alan.h * 0.5);
+  while (boy > 24 && gen(boy) > alan.g) boy -= 2;
+  const taban = ortaY(alan, boy * 1.3) + 22 + boy * 0.74;
   let x = alan.x;
   let ic = yazi(ETIKET, String(k.once.etiket).toLocaleUpperCase('tr'), x, taban - boy * 0.74 - 16, 21, RENK.ikincil, { aralik: 0.12 });
   ic += yazi(BASLIK, once, x, taban, boy, RENK.griCubuk);
@@ -65,7 +68,9 @@ function onceSonra({ kart: k, alan }, { farkYaz }) {
   ic += yazi(BASLIK, sonra, x, taban, boy, RENK.murekkep);
   x += genislik(BASLIK, sonra, boy) + 40;
   const ek = farkYaz(k);
-  if (ek) ic += yazi(ETIKET, kisalt(ETIKET, ek, 26, alan.x + alan.g - x), x, taban - 6, 26, RENK.ikincil);
+  // Açıklama yanda sığmazsa değerlerin altına iner.
+  if (ek && alan.x + alan.g - x >= 160) ic += yazi(ETIKET, kisalt(ETIKET, ek, 26, alan.x + alan.g - x), x, taban - 6, 26, RENK.ikincil);
+  else if (ek) ic += yazi(ETIKET, kisalt(ETIKET, ek, 26, alan.g), alan.x, taban + 44, 26, RENK.ikincil);
   return ic;
 }
 const farkMetni = (k) => {
@@ -80,18 +85,22 @@ function cubuklar({ kart: k, alan }) {
   const en = Math.max(...ogeler.map((o) => o.deger));
   const satir = Math.min(64, alan.h / ogeler.length);
   const adG = 280;
-  const degerG = 140;
-  const cubukG = alan.g - adG - degerG - 48;
+  // Değer sütunu en geniş değer kadar; çubuk geri kalanı kullanır. Değerler çok uzunsa yazı küçülür.
+  const degerler = ogeler.map((o) => degerTr(o.deger, o.birim ?? k.birim));
+  let degerBoy = 34;
+  while (degerBoy > 24 && Math.max(...degerler.map((d) => genislik(BASLIK, d, degerBoy))) > alan.g * 0.4) degerBoy -= 2;
+  const degerG = Math.max(...degerler.map((d) => genislik(BASLIK, d, degerBoy))) + 16;
+  const cubukG = Math.max(60, alan.g - adG - degerG - 32);
   const ust = ortaY(alan, satir * ogeler.length);
   const turkiyeVar = ogeler.some((o) => o.ad === 'Türkiye');
   let ic = '';
   ogeler.forEach((o, i) => {
     const orta = ust + i * satir + satir / 2;
     const vurgu = turkiyeVar ? o.ad === 'Türkiye' : i === 0;
-    const deger = degerTr(o.deger, o.birim ?? k.birim);
+    const deger = degerler[i];
     ic += yazi(BASLIK, kisalt(BASLIK, o.ad, 28, adG - 16), alan.x, orta + 10, 28, RENK.murekkep);
     ic += `<rect x="${alan.x + adG}" y="${(orta - 16).toFixed(1)}" width="${Math.max(4, (o.deger / en) * cubukG).toFixed(1)}" height="32" fill="${vurgu ? RENK.vurgu : RENK.griCubuk}"/>`;
-    ic += yazi(BASLIK, deger, alan.x + alan.g - genislik(BASLIK, deger, 34), orta + 12, 34, RENK.murekkep);
+    ic += yazi(BASLIK, deger, alan.x + alan.g - genislik(BASLIK, deger, degerBoy), orta + degerBoy * 0.36, degerBoy, RENK.murekkep);
   });
   return ic;
 }

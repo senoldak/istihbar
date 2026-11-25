@@ -15,7 +15,7 @@ const yazilar = async (h) => {
   const png = await ciz(h);
   return { png, y: yaziKaydiBitir() };
 };
-const yazili = (ek = {}) => ({ url: 'u', baslik: 'Kaynak başlığı', kaynak: 'Independent Türkçe', yayin: YAYIN, yazi: { baslik: 'Eskişehir’de askeri helikopter eğitim uçuşunda düştü', metin: 'm', ...ek } });
+const yazili = (ek = {}) => ({ url: 'u', baslik: 'Kaynak başlığı', kaynak: 'Örnek Kaynak', yayin: YAYIN, yazi: { baslik: 'Eskişehir’de askeri helikopter eğitim uçuşunda düştü', metin: 'm', ...ek } });
 
 test('eski satır: kategori ve puan yok, kaldırılmış şablon → düz kart, üst başlık yalnız saat', async () => {
   const { png, y } = await yazilar(yazili({ kart: { sablon: 'alinti', soz: 's', kisi: 'k' } }));
@@ -26,7 +26,7 @@ test('eski satır: kategori ve puan yok, kaldırılmış şablon → düz kart, 
 
 test('kaynak adı ve kaynak başlığı karta girmez', async () => {
   const { y } = await yazilar(yazili());
-  assert.ok(!y.some((m) => /Independent|Kaynak başlığı/.test(m)));
+  assert.ok(!y.some((m) => /Örnek Kaynak|Kaynak başlığı/.test(m)));
 });
 
 test('kategori üst başlığa girer', async () => {

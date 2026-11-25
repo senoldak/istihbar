@@ -5,6 +5,7 @@ import { BASLIK, ETIKET, genislik, RENK, yazi } from './kimlik.mjs';
 import { dunyaUlkeleri, enYakinIl, ilBul, sehirBul, turkiye, ulkeBul, yakinSehirler } from './yer.mjs';
 
 const PAY = 40; // etiketlerin kenara en yakın uzaklığı
+const SOL = 96 + PAY; // sol kenar 96 px'te kâğıda erir; etiket o bölgeye girmez
 const OLAY_BOY = 24;
 const SEHIR_BOY = 19;
 const buyuk = (s) => s.toLocaleUpperCase('tr');
@@ -26,9 +27,11 @@ function coz(girdi, g, y) {
   const olcek = g / 660;
   if (girdi.tur === 'il' || girdi.tur === 'deprem') {
     const koord = Number.isFinite(girdi.enlem) && Number.isFinite(girdi.boylam) ? [girdi.boylam, girdi.enlem] : null;
-    const il = ilBul(girdi.il) ?? (girdi.tur === 'deprem' && koord ? enYakinIl(koord) : null);
+    const bulunan = ilBul(girdi.il);
+    // İl bulunamadıysa (denizde deprem: "Akdeniz") en yakın il kullanılır; bu bir tahmindir ve öyle etiketlenir.
+    const il = bulunan ?? (girdi.tur === 'deprem' && koord ? enYakinIl(koord) : null);
     if (!il) throw new Error(`bilinmeyen il: ${girdi.il}`);
-    return { nokta: girdi.tur === 'deprem' && koord ? koord : il.nokta, hedef: il.halkalar, ad: il.ad, yer: { ad: il.ad }, tr: true, k: (girdi.tur === 'deprem' ? 200 : 168) * olcek };
+    return { nokta: girdi.tur === 'deprem' && koord ? koord : il.nokta, hedef: il.halkalar, ad: il.ad, yer: { ad: il.ad, tahmini: !bulunan }, tr: true, k: (girdi.tur === 'deprem' ? 200 : 168) * olcek };
   }
   if (girdi.tur === 'dunya') {
     const u = ulkeBul(girdi.ulke);
@@ -77,17 +80,27 @@ export function haritaSvg(girdi, { g, y }) {
   }
   ic += `<path d="${yol(c.hedef)}" fill="${RENK.murekkep}" fill-opacity="0.10" stroke="${RENK.murekkep}" stroke-opacity="0.55" stroke-width="2"/>`;
 
-  // Olay adı: noktanın sağ üstünde; sağa sığmazsa sol üstünde; üste sığmazsa altta.
+  // Olay adı: noktanın sağ üstünde; sağa sığmazsa sol üstünde; ikisine de sığmazsa yazı küçülür (en az 16 px), yine
+  // sığmazsa noktanın üstüne, görünür alan içinde (sol erime bölgesi + pay ile sağ pay arası) ortalanır. Üste sığmazsa altta.
   const etiketler = [];
   const olayAd = buyuk(c.ad);
-  const og = genislik(BASLIK, olayAd, OLAY_BOY, { aralik: 0.1 });
-  const sag = nx + 50 + og <= g - PAY;
   const ust = ny - 36 - OLAY_BOY >= PAY;
-  const ucX = sag ? nx + 44 : nx - 44;
   const ucY = ust ? ny - 36 : ny + 36;
-  const tx = sag ? ucX + 6 : ucX - 6 - og;
-  const taban = ucY + OLAY_BOY * 0.36;
-  const olayKutu = { ad: olayAd, x: tx, y: taban - OLAY_BOY * 0.74, g: og, h: OLAY_BOY * 0.74 };
+  let boy = OLAY_BOY;
+  let og;
+  let yan = null;
+  for (; boy >= 16; boy -= 2) {
+    og = genislik(BASLIK, olayAd, boy, { aralik: 0.1 });
+    if (nx + 50 + og <= g - PAY) yan = 'sag';
+    else if (nx - 50 - og >= SOL) yan = 'sol';
+    if (yan) break;
+  }
+  if (!yan) boy = 16;
+  og = genislik(BASLIK, olayAd, boy, { aralik: 0.1 });
+  const ucX = yan === 'sag' ? nx + 44 : yan === 'sol' ? nx - 44 : nx;
+  const tx = yan === 'sag' ? ucX + 6 : yan === 'sol' ? ucX - 6 - og : Math.min(Math.max(nx - og / 2, SOL), g - PAY - og);
+  const taban = ucY + boy * 0.36;
+  const olayKutu = { ad: olayAd, x: tx, y: taban - boy * 0.74, g: og, h: boy * 0.74 };
   etiketler.push(olayKutu);
 
   // Komşu şehirler: en çok iki; noktaya 104 px'ten yakın, kenar payını aşan ya da bir etikete binen düşer.
@@ -99,7 +112,7 @@ export function haritaSvg(girdi, { g, y }) {
     const ad = buyuk(s.ad);
     const w = genislik(ETIKET, ad, SEHIR_BOY, { aralik: 0.11 });
     const kt = { ad, x: x - 6, y: yy - SEHIR_BOY * 0.6, g: w + 16, h: SEHIR_BOY * 1.2 };
-    if (kt.x < PAY || kt.y < PAY || kt.x + kt.g > g - PAY || kt.y + kt.h > y - PAY) continue;
+    if (kt.x < SOL || kt.y < PAY || kt.x + kt.g > g - PAY || kt.y + kt.h > y - PAY) continue;
     if (etiketler.some((e) => kesisir(e, kt))) continue;
     etiketler.push(kt);
     sehirKatmani.push(`<circle cx="${x.toFixed(1)}" cy="${yy.toFixed(1)}" r="3.6" fill="${RENK.sehir}"/>` + hare(yazi(ETIKET, ad, x + 10, yy + SEHIR_BOY * 0.36, SEHIR_BOY, RENK.sehir, { aralik: 0.11 })));
@@ -108,10 +121,11 @@ export function haritaSvg(girdi, { g, y }) {
 
   ic += `<circle cx="${nx}" cy="${ny}" r="28" fill="none" stroke="${RENK.vurgu}" stroke-opacity="0.35" stroke-width="2"/>`;
   ic += `<circle cx="${nx}" cy="${ny}" r="10" fill="${RENK.vurgu}"/>`;
-  const bx = sag ? nx + 10 : nx - 10;
+  const bx = yan === 'sag' ? nx + 10 : yan === 'sol' ? nx - 10 : nx;
   const by = ust ? ny - 8 : ny + 8;
-  ic += `<path d="M${bx},${by}L${ucX},${ucY}" stroke="${RENK.murekkep}" stroke-width="1.6"/>`;
-  ic += hare(yazi(BASLIK, olayAd, tx, taban, OLAY_BOY, RENK.murekkep, { aralik: 0.1 }));
+  const ucY2 = yan ? ucY : ust ? ucY + 8 : ucY - boy * 0.74 - 8; // ortalanan etikette çizgi yazının altında/üstünde biter
+  ic += `<path d="M${bx},${by}L${ucX},${ucY2}" stroke="${RENK.murekkep}" stroke-width="1.6"/>`;
+  ic += hare(yazi(BASLIK, olayAd, tx, taban, boy, RENK.murekkep, { aralik: 0.1 }));
 
   // Sol kenar kâğıda erir.
   ic += `<defs><linearGradient id="kagit-gecis" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="${RENK.zemin}"/><stop offset="1" stop-color="${RENK.zemin}" stop-opacity="0"/></linearGradient></defs><rect width="96" height="${y}" fill="url(#kagit-gecis)"/>`;

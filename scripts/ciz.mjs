@@ -26,7 +26,8 @@ function gorselSec(h, saat) {
     return {
       tur: 'harita',
       girdi: { tur: 'deprem', il: d.il ?? null, enlem: d.enlem, boylam: d.boylam },
-      bilgi: (yer) => [buyukluk && { etiket: 'BÜYÜKLÜK', deger: buyukluk, buyuk: true }, { etiket: 'SAAT', deger: saat }, { etiket: 'İL', deger: yer.ad }].filter(Boolean),
+      // İl bulunamayıp en yakın il kullanıldıysa (denizde deprem) etiket bunu söyler; tahmin kesin bilgi gibi yazılmaz.
+      bilgi: (yer) => [buyukluk && { etiket: 'BÜYÜKLÜK', deger: buyukluk, buyuk: true }, { etiket: 'SAAT', deger: saat }, { etiket: yer.tahmini ? 'EN YAKIN İL' : 'İL', deger: yer.ad }].filter(Boolean),
     };
   }
   const kart = h.yazi?.kart;
@@ -53,7 +54,8 @@ export async function ciz(h) {
     kategori,
     saat,
     sonDakika: !h.deprem && Number(h.puan) >= SON_DAKIKA_PUANI,
-    tsi: kategori === 'DÜNYA',
+    // Dünya haberinde ya da dünya haritalı kartta (yanında YEREL SAAT olabilir) üst başlık saati TSİ diye belirtilir.
+    tsi: kategori === 'DÜNYA' || h.yazi?.kart?.sablon === 'dunya',
     baslik: h.yazi?.baslik || h.baslik,
     tarih: tarihTr(h.yayin),
   };
